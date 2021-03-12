@@ -7,6 +7,9 @@ namespace OraclePhpExample
     {
         private static void Main(string[] args)
         {
+	        PrintHugeNumbersTwoStructure(36617110);
+	        PrintHugeNumbersTwoStructure(6916729);
+
 	        PrintComparingTwoStructure();
 
 	        /*
@@ -27,12 +30,14 @@ namespace OraclePhpExample
         {
 	        for (ulong idx = 0; idx <= 20; idx++)
 	        {
-		        var someGuid1 = MoreNewerGuidGenerator.ConvertToGuid(idx);
-		        var someGuid2 = MoreNewerGuidGenerator.ConvertToGuid(idx);
+		        var someGuid1 = MoreNewerGuidGenerator.ConvertToGuid(idx, 123456789);
+		        var someGuid2 = MoreNewerGuidGenerator.ConvertToGuid(idx, 987654321);
 
 		        var someId1 = MoreNewerGuidGenerator.ConvertToULong(someGuid1);
+		        var someId2 = MoreNewerGuidGenerator.ConvertToULong(someGuid2);
 
-		        Console.WriteLine($"{someId1}");
+		        Console.WriteLine($"{someId1.id}:{someId1.entityType}");
+		        Console.WriteLine($"{someId2.id}:{someId2.entityType}");
 		        Console.WriteLine($"{someGuid1} === {someGuid2}");    
 	        }
         }
@@ -126,9 +131,11 @@ namespace OraclePhpExample
 	    /// </summary>
 	    /// <param name="guid">Глобальный уникальный идентификатор</param>
 	    /// <returns>Целочисленный 8-байтный идентификатор</returns>
-        public static ulong ConvertToULong(Guid guid)
+        public static (ulong id, int entityType) ConvertToULong(Guid guid)
         {
 	        var guidByteArray = guid.ToByteArray();
+	        
+	        var c = (guidByteArray[7] << 24) | (guidByteArray[6] << 16) | (guidByteArray[5] << 8) | guidByteArray[4];
 	        
 	        var d = guidByteArray[8];
 	        var e = guidByteArray[9];
@@ -144,7 +151,7 @@ namespace OraclePhpExample
 		       f, g, h, i, j, k, d, e
 	        };
 
-	        return ToLong(longByteArray);
+	        return (ToULong(longByteArray), c);
         }
         
 	    /// <summary>
@@ -153,7 +160,7 @@ namespace OraclePhpExample
 	    /// <param name="data">Массив байт длинны 8</param>
 	    /// <returns>Целочисленное 8-байтовое число</returns>
 	    /// <exception cref="ArgumentException">Массив байт должен быть длинной 8</exception>
-        private static ulong ToLong(byte[] data)
+        private static ulong ToULong(byte[] data)
         {
 	        const int requiredSize = 8;
 
